@@ -59,16 +59,19 @@ def crear_kb() -> KnowledgeBase:
     kb.add_fact(Predicate("frente_a_multiples_testigos", (lorenzo, escenario)))
     kb.add_fact(Predicate("lugar_alejado", (escenario, camerino)))
     
-    # Testimonios
+    # Testimonios y presencia en escena
     kb.add_fact(Predicate("vio_en_escena", (catalina, sofia, camerino)))
     kb.add_fact(Predicate("reputacion_honesta", (catalina,)))
+    kb.add_fact(Predicate("testigo_confiable", (catalina,)))
+    kb.add_fact(Predicate("presente_en_escena", (sofia, camerino)))  # Derivado de testimonio confiable
     
     # Coartadas cruzadas
     kb.add_fact(Predicate("da_coartada", (diego, sofia)))
     kb.add_fact(Predicate("da_coartada", (sofia, diego)))
     
-    # Antecedentes
+    # Antecedentes y cómplices
     kb.add_fact(Predicate("antecedentes_mentir", (diego,)))
+    kb.add_fact(Predicate("complice_potencial", (diego,)))  # Derivado de dar coartada a sospechosa con antecedentes
 
     # === REGLAS DE INFERENCIA ===
     
@@ -108,12 +111,12 @@ def crear_kb() -> KnowledgeBase:
         ]
     ))
     
-    # Regla 6: evidencia_fisica(X) ∧ presente_en_escena(X,Y) → principal_sospechoso(X)
+    # Regla 6: evidencia_fisica(X) ∧ presente_en_escena(X,camerino) → principal_sospechoso(X)
     kb.add_rule(Rule(
         Predicate("principal_sospechoso", (Term("$X"),)),
         [
             Predicate("evidencia_fisica", (Term("$X"),)),
-            Predicate("presente_en_escena", (Term("$X"), Term("$Y")))
+            Predicate("presente_en_escena", (Term("$X"), camerino))
         ]
     ))
     
