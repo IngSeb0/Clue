@@ -34,8 +34,63 @@ def crear_kb() -> KnowledgeBase:
     pablo          = Term("pablo")
     bernardo       = Term("bernardo")
     frasco_arsenico = Term("frasco_arsenico")
+    biblioteca = Term("biblioteca")
 
     # === YOUR CODE HERE ===
+    kb.add_fact(Predicate("escena_del_crimen", (biblioteca,)))
+    kb.add_fact(Predicate("arma_del_crimen", (frasco_arsenico,)))
+    kb.add_fact(Predicate("lejos_escena", (pablo,)))
+    kb.add_fact(Predicate("lejos_escena", (bernardo,)))
+    kb.add_fact(Predicate("huellas_en_arma", (reynaldo, frasco_arsenico)))
+    kb.add_fact(Predicate("da_coartada", (margot, reynaldo)))
+    kb.add_fact(Predicate("da_coartada",(reynaldo, margot)))
+    kb.add_fact(Predicate("acusa", (pablo, reynaldo)))
+
+    # huellas_en_arma(X,Y) -> evidencia_directa(X)
+    kb.add_rule(Rule(Predicate("evidencia_directa", (Term("$X"),)),
+                     [Predicate("huellas_en_arma", (Term("$X"), Term("$Y")))]
+                ))
+    # lejos_escena(X) -> descartado(X)
+    kb.add_rule(Rule(
+        Predicate("descartado", (Term("$X"),)),
+        [Predicate("lejos_escena", (Term("$X"),))]
+    ))
+
+    #descartado(X) ∧ acusa(X,Y) -> testimonio_confiable(X,Y)
+    kb.add_rule(Rule(
+        Predicate("testimonio_confible", (Term("$X"), Term("$Y"))),
+        [
+            Predicate("descartado", (Term("$X"),)),
+            Predicate("acusa", (Term("$X"), Term("$Y")))
+        ]
+    ))
+
+    # da_coartada(X,Y) ∧ da_coartada(Y,X) -> coartada_cruzada(X,Y)
+    kb.add_rule(Rule(
+        Predicate("coartada_cruzada", (Term("$X"), Term("$Y"))),
+        [
+            Predicate("da_coartada", (Term("$X"), Term("$Y"))),
+            Predicate("da_coartada",(Term("$Y"), Term("$X")))
+        ]
+    ))
+
+    # evidencia_directa(X) ∧ coartada_cruzada(X,Y) -> culpable(X)
+    kb.add_rule(Rule(
+        Predicate("culpable", (Term("$X"),)),
+        [
+            Predicate("evidencia_directa", (Term("$X"),)),
+            Predicate("coartada_cruzada", (Term("$X"), Term("$Y")))
+        ]
+    ))
+
+    #culpable(Y) ∧ da_coartada(X,Y) -> encubridor(X)
+    kb.add_rule(Rule(
+        Predicate("encubridor", (Term("$X"),)),
+        [
+            Predicate("culpable", (Term("$Y"),)),
+            Predicate("da_coartada",(Term("$X"), Term("$Y")))
+        ]
+    ))
 
     # === END YOUR CODE ===
 

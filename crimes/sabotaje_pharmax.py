@@ -42,6 +42,74 @@ def crear_kb() -> KnowledgeBase:
 
     # === YOUR CODE HERE ===
 
+    kb.add_fact(Predicate("viaje_oficial_exterior", (dra_santos,)))
+    kb.add_fact(Predicate("asistencia_conferencia_verificada", (director_vega,)))
+    kb.add_fact(Predicate("sin_coartada", (tec_rios,)))
+    kb.add_fact(Predicate("sin_coartada", (asistente_mora,)))
+    kb.add_fact(Predicate("acceso_registrado", (tec_rios, sala_cultivos)))
+    kb.add_fact(Predicate("acceso_registrado", (asistente_mora, sala_cultivos)))
+    kb.add_fact(Predicate("recibio_pagos", (tec_rios, syntek_corp)))
+    kb.add_fact(Predicate("rival_se_beneficia", (syntek_corp,)))
+    kb.add_fact(Predicate("acusa", (asistente_mora, tec_rios)))
+ 
+    # viaje_ofical_exterior(X) -> coartada_verificada(X)
+    kb.add_rule(Rule(
+        Predicate("coartada_verificada", (Term("$X"),)),
+        [Predicate("viaje_oficial_exterior", (Term("$X"),))]
+    ))
+    
+    # asistencia_conferencia_verificada(X) → coartada_verificada(X)
+    kb.add_rule(Rule(
+        Predicate("coartada_verificada", (Term("$X"),)),
+        [Predicate("asistencia_conferencia_verificada", (Term("$X"),))]
+    ))
+    
+    # coartada_verificada(X) → descartado(X)
+    kb.add_rule(Rule(
+        Predicate("descartado", (Term("$X"),)),
+        [Predicate("coartada_verificada", (Term("$X"),))]
+    ))
+    
+    # recibio_pagos(X,Y) ∧ rival_se_beneficia(Y) → conflicto_de_intereses(X,Y)
+    kb.add_rule(Rule(
+        Predicate("conflicto_intereses", (Term("$X"), Term("$Y"))),
+        [
+            Predicate("recibio_pagos", (Term("$X"), Term("$Y"))),
+            Predicate("rival_se_beneficia", (Term("$Y"),))
+        ]
+    ))
+    
+    # conflicto_de_intereses(X,Y) → motivo_económico(X)
+    kb.add_rule(Rule(
+        Predicate("motivo_economico", (Term("$X"),)),
+        [Predicate("conflicto_intereses", (Term("$X"), Term("$Y")))]
+    ))
+    
+    # acceso_registrado(X,Y) → acceso_en_momento_crimen(X)
+    kb.add_rule(Rule(
+        Predicate("acceso_en_momento_crimen", (Term("$X"),)),
+        [Predicate("acceso_registrado", (Term("$X"), Term("$Y")))]
+    ))
+    
+    # sin_coartada(X) + motivo_económico(X) + acceso_en_momento_crimen(X) → culpable(X)
+    kb.add_rule(Rule(
+        Predicate("culpable", (Term("$X"),)),
+        [
+            Predicate("sin_coartada", (Term("$X"),)),
+            Predicate("motivo_economico", (Term("$X"),)),
+            Predicate("acceso_en_momento_crimen", (Term("$X"),))
+        ]
+    ))
+    
+    # acusa(X,Y) ∧ acceso_en_momento_crimen(X) → denuncia_informada(X,Y)
+    kb.add_rule(Rule(
+        Predicate("denuncia_informada", (Term("$X"), Term("$Y"))),
+        [
+            Predicate("acusa", (Term("$X"), Term("$Y"))),
+            Predicate("acceso_en_momento_crimen", (Term("$X"),))
+        ]
+    ))
+    
     # === END YOUR CODE ===
 
     return kb
